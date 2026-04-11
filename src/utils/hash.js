@@ -1,21 +1,11 @@
 'use strict';
 
-const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
-const genRandomString = (length) =>
-  crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
+const SALT_ROUNDS = 12;
 
-const sha512 = (password, salt) => {
-  const hash = crypto.createHmac('sha512', salt);
-  hash.update(password);
-  return { salt, passwordHash: hash.digest('hex') };
-};
+const hashPassword = async (plainPassword) => bcrypt.hash(plainPassword, SALT_ROUNDS);
 
-const saltHashPassword = (userPassword) => {
-  const salt = genRandomString(16);
-  return sha512(userPassword, salt);
-};
+const verifyPassword = async (plainPassword, hash) => bcrypt.compare(plainPassword, hash);
 
-const checkHashPassword = (userPassword, salt) => sha512(userPassword, salt);
-
-module.exports = { saltHashPassword, checkHashPassword };
+module.exports = { hashPassword, verifyPassword };
